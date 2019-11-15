@@ -119,6 +119,18 @@
    ([#8423](https://github.com/Microsoft/vscode-python/issues/8423))
 1. Export to python button is blue in native editor.
    ([#8424](https://github.com/Microsoft/vscode-python/issues/8424))
+1. CTRL+Z is deleting cells. It should only undo changes inside of the code for a cell. 'Z' and 'SHIFT+Z' are for undoing/redoing cell adds/moves.
+   ([#7999](https://github.com/Microsoft/vscode-python/issues/7999))
+1. Ensure clicking `ctrl+s` in a new `notebook` prompts the user to select a file once instead of twice.
+   ([#8138](https://github.com/Microsoft/vscode-python/issues/8138))
+1. Creating a new blank notebook should not require a search for jupyter.
+   ([#8481](https://github.com/Microsoft/vscode-python/issues/8481))
+1. Arrowing up and down through cells can lose code that was just typed.
+   ([#8491](https://github.com/Microsoft/vscode-python/issues/8491))
+1. After pasting code, arrow keys don't navigate in a cell.
+   ([#8495](https://github.com/Microsoft/vscode-python/issues/8495))
+1. Typing 'z' in a cell causes the cell to disappear.
+   ([#8594](https://github.com/Microsoft/vscode-python/issues/8594))
 
 ### Code Health
 
