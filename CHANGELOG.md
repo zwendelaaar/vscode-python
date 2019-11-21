@@ -8,6 +8,10 @@
    ([#8673](https://github.com/Microsoft/vscode-python/issues/8673))
 1. Converting to python script no longer working from a notebook.
    ([#8677](https://github.com/Microsoft/vscode-python/issues/8677))
+1. Fixes to starting `Jupyter` in a `Docker` container.
+   ([#8661](https://github.com/Microsoft/vscode-python/issues/8661))
+1. Ensure arguments are generated correctly for `getRemoteLauncherCommand` when in debugger experiment.
+   ([#8685](https://github.com/Microsoft/vscode-python/issues/8685))
 
 ### Thanks
 
