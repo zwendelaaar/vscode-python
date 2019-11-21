@@ -194,7 +194,7 @@ export class NotebookStarter implements Disposable {
                     if (stdout && stdout.toString().includes('(root)')) {
                         args.push('--allow-root');
                     }
-                    resolve([]);
+                    resolve(args);
                 });
             });
         } catch {
