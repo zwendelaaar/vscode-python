@@ -507,7 +507,7 @@ export class JupyterNotebookBase implements INotebook {
         return this.launchInfo.kernelSpec;
     }
 
-    public async setKernelSpec(spec: IJupyterKernelSpec | LiveKernelModel): Promise<void> {
+    public async setKernelSpec(spec: IJupyterKernelSpec | LiveKernelModel, timeoutMS: number): Promise<void> {
         // Change our own kernel spec
         this.launchInfo.kernelSpec = spec;
 
@@ -517,7 +517,7 @@ export class JupyterNotebookBase implements INotebook {
             this.ranInitialSetup = false;
 
             // Change the kernel on the session
-            await this.session.changeKernel(spec);
+            await this.session.changeKernel(spec, timeoutMS);
 
             // Rerun our initial setup
             await this.initialize();
