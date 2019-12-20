@@ -1323,10 +1323,10 @@ export abstract class InteractiveBase extends WebViewHost<IInteractiveWindowMapp
             await this.switchKernelWithRetry(kernel);
         }
     }
-    private async switchKernelWithRetry(kernel: KernelSpecInterpreter){
+    private async switchKernelWithRetry(kernel: KernelSpecInterpreter) {
         const settings = this.configuration.getSettings();
         const isLocalConnection = this.notebook?.server.getConnectionInfo()?.localLaunch ?? settings.datascience.jupyterServerURI.toLowerCase() === Settings.JupyterServerLocalLaunch;
-        if (!isLocalConnection){
+        if (!isLocalConnection) {
             return this.switchKernel(kernel);
         }
 
@@ -1337,6 +1337,7 @@ export abstract class InteractiveBase extends WebViewHost<IInteractiveWindowMapp
         while (true) {
             try {
                 await this.switchKernel(kernel);
+                break;
             } catch (ex) {
                 if (ex instanceof JupyterSessionStartError && isLocalConnection) {
                     // Looks like we were unable to start a session for the local connection.
@@ -1349,7 +1350,7 @@ export abstract class InteractiveBase extends WebViewHost<IInteractiveWindowMapp
                     const selection = await this.applicationShell.showErrorMessage(message, selectKernel, cancel);
                     if (selection === selectKernel) {
                         kernel = await this.dataScience.selectLocalJupyterKernel(kernel.kernelSpec || kernel.kernelModel);
-                        if (Object.keys(kernel).length > 0){
+                        if (Object.keys(kernel).length > 0) {
                             continue;
                         }
                     }
