@@ -391,7 +391,11 @@ suite('Process - PythonExecutionFactory', () => {
 
                 expect(daemon1).to.equal(daemon2);
             });
-            test('Create Daemon Service should return two different daemons (if python path is different)', async () => {
+            // https://github.com/microsoft/vscode-python/issues/9297
+            // tslint:disable-next-line: no-function-expression
+            test('Create Daemon Service should return two different daemons (if python path is different)', async function() {
+                // tslint:disable-next-line: no-invalid-this
+                return this.skip();
                 const pythonSettings = mock(PythonSettings);
                 when(activationHelper.getActivatedEnvironmentVariables(resource, anything(), anything())).thenResolve({ x: '1' });
                 when(pythonSettings.pythonPath).thenReturn('HELLO');
