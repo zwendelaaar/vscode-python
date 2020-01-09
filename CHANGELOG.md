@@ -62,6 +62,8 @@
    ([#4644](https://github.com/Microsoft/vscode-python/issues/4644))
 1. Notify user when starting jupyter times out and added `Jupyter` output panel to display output from Jupyter.
    ([#9068](https://github.com/Microsoft/vscode-python/issues/9068))
+1. Add support for `Find` in the `Notebook Editor`.
+   ([#9470](https://github.com/Microsoft/vscode-python/issues/9470))
 
 ### Fixes
 
