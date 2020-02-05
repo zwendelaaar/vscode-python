@@ -47,6 +47,9 @@
 
 ### Fixes
 
+1. Removed unnecessary warning when executing cells that use Scrapbook,
+   Fix an html crash when using not supported mime types
+   ([#9796](https://github.com/microsoft/vscode-python/issues/9796))
 1. Fixed the focus on the interactive window when pressing ctrl + 1/ ctrl + 2
    ([#9693](https://github.com/microsoft/vscode-python/issues/9693))
 1. Fix variable explorer in Interactive and Notebook editors from interfering with execution.
