@@ -47,6 +47,8 @@
 
 ### Fixes
 
+1. Make sure to clear variable list on restart kernel.
+   ([#9740](https://github.com/Microsoft/vscode-python/issues/9740))
 1. Use the autoStart server when available.
    ([#9926](https://github.com/Microsoft/vscode-python/issues/9926))
 1. Removed unnecessary warning when executing cells that use Scrapbook,
