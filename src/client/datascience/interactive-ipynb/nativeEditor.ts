@@ -24,7 +24,7 @@ import { StopWatch } from '../../common/utils/stopWatch';
 import { EXTENSION_ROOT_DIR } from '../../constants';
 import { IInterpreterService } from '../../interpreter/contracts';
 import { captureTelemetry, sendTelemetryEvent } from '../../telemetry';
-import { EditorContexts, Identifiers, NativeKeyboardCommandTelemetryLookup, NativeMouseCommandTelemetryLookup, Telemetry } from '../constants';
+import { EditorContexts, Identifiers, KnownNotebookLanguages, NativeKeyboardCommandTelemetryLookup, NativeMouseCommandTelemetryLookup, Telemetry } from '../constants';
 import { InteractiveBase } from '../interactive-common/interactiveBase';
 import {
     IEditCell,
@@ -327,7 +327,12 @@ export class NativeEditor extends InteractiveBase implements INotebookEditor {
         return this.setDirty();
     }
 
-    protected addSysInfo(_reason: SysInfoReason): Promise<void> {
+    protected addSysInfo(reason: SysInfoReason): Promise<void> {
+        // We need to send a message when restarting
+        if (reason === SysInfoReason.Restart || reason === SysInfoReason.New) {
+            this.postMessage(InteractiveWindowMessages.RestartKernel).ignoreErrors();
+        }
+
         // These are not supported.
         return Promise.resolve();
     }
@@ -398,7 +403,7 @@ export class NativeEditor extends InteractiveBase implements INotebookEditor {
         }
     }
 
-    @captureTelemetry(Telemetry.ExecuteNativeCell, undefined, false)
+    @captureTelemetry(Telemetry.ExecuteNativeCell, undefined, true)
     // tslint:disable-next-line:no-any
     protected async reexecuteCell(info: ISubmitNewCell): Promise<void> {
         try {
@@ -588,6 +593,9 @@ export class NativeEditor extends InteractiveBase implements INotebookEditor {
         // Then save the contents. We'll stick our cells back into this format when we save
         if (json) {
             this.notebookJson = json;
+
+            // Log language or kernel telemetry
+            this.sendLanguageTelemetry(this.notebookJson);
         }
         this.contentsLoadedPromise.resolve();
 
@@ -607,6 +615,27 @@ export class NativeEditor extends InteractiveBase implements INotebookEditor {
             }),
             forceDirty
         );
+    }
+
+    private sendLanguageTelemetry(notebookJson: Partial<nbformat.INotebookContent>) {
+        try {
+            // See if we have a language
+            let language = '';
+            if (notebookJson.metadata?.language_info?.name) {
+                language = notebookJson.metadata?.language_info?.name;
+            } else if (notebookJson.metadata?.kernelspec?.language) {
+                language = notebookJson.metadata?.kernelspec?.language.toString();
+            }
+            if (language && !KnownNotebookLanguages.includes(language.toLowerCase())) {
+                language = 'unknown';
+            }
+            if (language) {
+                sendTelemetryEvent(Telemetry.NotebookLanguage, undefined, { language });
+            }
+        } catch {
+            // If this fails, doesn't really matter
+            noop();
+        }
     }
 
     private async loadCells(cells: ICell[], forceDirty: boolean): Promise<void> {

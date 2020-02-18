@@ -30,7 +30,7 @@ const DocStringRegex = /.*?\[.*?;31mDocstring:.*?\[0m\s+(.*)/;
 const CountRegex = /.*?\[.*?;31mLength:.*?\[0m\s+(.*)/;
 const ShapeRegex = /^\s+\[(\d+) rows x (\d+) columns\]/m;
 
-const DataViewableTypes: Set<string> = new Set<string>(['DataFrame', 'list', 'dict', 'np.array', 'Series']);
+const DataViewableTypes: Set<string> = new Set<string>(['DataFrame', 'list', 'dict', 'ndarray', 'Series']);
 
 interface INotebookState {
     currentExecutionCount: number;
@@ -98,8 +98,9 @@ export class JupyterVariables implements IJupyterVariables {
             return defaultValue;
         }
 
-        // Prep our targetVariable to send over
-        const variableString = JSON.stringify(targetVariable).replace(/\\n/g, '\\\\n');
+        // Prep our targetVariable to send over. Remove the 'value' as it's not necessary for getting df info and can have invalid data in it
+        const pruned = { ...targetVariable, value: '' };
+        const variableString = JSON.stringify(pruned);
 
         // Setup a regex
         const regexPattern = extraReplacements.length === 0 ? '_VSCode_JupyterTestValue' : ['_VSCode_JupyterTestValue', ...extraReplacements.map(v => v.key)].join('|');

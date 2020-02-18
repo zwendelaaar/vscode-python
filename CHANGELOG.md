@@ -1,5 +1,82 @@
 # Changelog
 
+## 2020.2.2 (18 February 2020)
+
+### Fixes
+
+1. Improve error messaging when the jupyter notebook cannot be started.
+   ([#9904](https://github.com/Microsoft/vscode-python/issues/9904))
+1. Clear variables in notebooks and interactive-window when restarting.
+   ([#9991](https://github.com/Microsoft/vscode-python/issues/9991))
+1. Re-install `Jupyter` instead of installing `kernelspec` if `kernelspec` cannot be found in the python environment.
+   ([#10071](https://github.com/Microsoft/vscode-python/issues/10071))
+1. Fixes problem with showing ndarrays in the data viewer.
+   ([#10074](https://github.com/Microsoft/vscode-python/issues/10074))
+1. Fix data viewer not opening on certain data frames.
+   ([#10075](https://github.com/Microsoft/vscode-python/issues/10075))
+
+### Code Health
+
+1. Add telemetry to track notebook languages
+   ([#9819](https://github.com/Microsoft/vscode-python/issues/9819))
+1. Telemetry around kernels not working and installs not working.
+   ([#9883](https://github.com/Microsoft/vscode-python/issues/9883))
+1. Change select kernel telemetry to track duration till quick pick appears.
+   ([#10049](https://github.com/Microsoft/vscode-python/issues/10049))
+
+### Thanks
+
+Thanks to the following projects which we fully rely on to provide some of
+our features:
+
+-   [isort](https://pypi.org/project/isort/)
+-   [jedi](https://pypi.org/project/jedi/)
+    and [parso](https://pypi.org/project/parso/)
+-   [Microsoft Python Language Server](https://github.com/microsoft/python-language-server)
+-   [ptvsd](https://pypi.org/project/ptvsd/)
+-   [exuberant ctags](http://ctags.sourceforge.net/) (user-installed)
+-   [rope](https://pypi.org/project/rope/) (user-installed)
+
+Also thanks to the various projects we provide integrations with which help
+make this extension useful:
+
+-   Debugging support:
+    [Django](https://pypi.org/project/Django/),
+    [Flask](https://pypi.org/project/Flask/),
+    [gevent](https://pypi.org/project/gevent/),
+    [Jinja](https://pypi.org/project/Jinja/),
+    [Pyramid](https://pypi.org/project/pyramid/),
+    [PySpark](https://pypi.org/project/pyspark/),
+    [Scrapy](https://pypi.org/project/Scrapy/),
+    [Watson](https://pypi.org/project/Watson/)
+-   Formatting:
+    [autopep8](https://pypi.org/project/autopep8/),
+    [black](https://pypi.org/project/black/),
+    [yapf](https://pypi.org/project/yapf/)
+-   Interpreter support:
+    [conda](https://conda.io/),
+    [direnv](https://direnv.net/),
+    [pipenv](https://pypi.org/project/pipenv/),
+    [pyenv](https://github.com/pyenv/pyenv),
+    [venv](https://docs.python.org/3/library/venv.html#module-venv),
+    [virtualenv](https://pypi.org/project/virtualenv/)
+-   Linting:
+    [bandit](https://pypi.org/project/bandit/),
+    [flake8](https://pypi.org/project/flake8/),
+    [mypy](https://pypi.org/project/mypy/),
+    [prospector](https://pypi.org/project/prospector/),
+    [pylint](https://pypi.org/project/pylint/),
+    [pydocstyle](https://pypi.org/project/pydocstyle/),
+    [pylama](https://pypi.org/project/pylama/)
+-   Testing:
+    [nose](https://pypi.org/project/nose/),
+    [pytest](https://pypi.org/project/pytest/),
+    [unittest](https://docs.python.org/3/library/unittest.html#module-unittest)
+
+And finally thanks to the [Python](https://www.python.org/) development team and
+community for creating a fantastic programming language and community to be a
+part of!
+
 ## 2020.2.1 (12 February 2020)
 
 ### Fixes

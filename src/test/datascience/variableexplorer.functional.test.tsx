@@ -184,7 +184,16 @@ myDict = {'a': 1}`;
                 { name: 'myDict', value: "{'a': 1}", supportsDataExplorer: true, type: 'dict', size: 54, shape: '', count: 0, truncated: false },
                 { name: 'myList', value: '[1, 2, 3]', supportsDataExplorer: true, type: 'list', size: 54, shape: '', count: 0, truncated: false },
                 // Set can vary between python versions, so just don't both to check the value, just see that we got it
-                { name: 'mySet', value: undefined, supportsDataExplorer: true, type: 'set', size: 54, shape: '', count: 0, truncated: false }
+                {
+                    name: 'mySet',
+                    value: undefined,
+                    supportsDataExplorer: false,
+                    type: 'set',
+                    size: 54,
+                    shape: '',
+                    count: 0,
+                    truncated: false
+                }
             ];
             verifyVariables(wrapper, targetVariables);
         },
@@ -356,18 +365,29 @@ function verifyRow(rowWrapper: ReactWrapper<any, Readonly<{}>, React.Component>,
     if (targetVariable.value) {
         verifyCell(rowCells.at(3), targetVariable.value, targetVariable.name);
     }
+
+    verifyCell(rowCells.at(4), targetVariable.supportsDataExplorer, targetVariable.name);
 }
 
 // Verify a single cell value against a specific target value
-function verifyCell(cellWrapper: ReactWrapper<any, Readonly<{}>, React.Component>, value: string, targetName: string) {
+function verifyCell(cellWrapper: ReactWrapper<any, Readonly<{}>, React.Component>, value: string | boolean, targetName: string) {
     const cellHTML = parse(cellWrapper.html()) as any;
-    // tslint:disable-next-line:no-string-literal
-    const match = /value="([\s\S]+?)"\s+/.exec(cellHTML.innerHTML);
-    expect(match).to.not.be.equal(null, `${targetName} does not have a value attribute`);
+    const innerHTML = cellHTML.innerHTML;
+    if (typeof value === 'string') {
+        // tslint:disable-next-line:no-string-literal
+        const match = /value="([\s\S]+?)"\s+/.exec(innerHTML);
+        expect(match).to.not.be.equal(null, `${targetName} does not have a value attribute`);
 
-    // Eliminate whitespace differences
-    const actualValueNormalized = match![1].replace(/^\s*|\s(?=\s)|\s*$/g, '').replace(/\r\n/g, '\n');
-    const expectedValueNormalized = value.replace(/^\s*|\s(?=\s)|\s*$/g, '').replace(/\r\n/g, '\n');
+        // Eliminate whitespace differences
+        const actualValueNormalized = match![1].replace(/^\s*|\s(?=\s)|\s*$/g, '').replace(/\r\n/g, '\n');
+        const expectedValueNormalized = value.replace(/^\s*|\s(?=\s)|\s*$/g, '').replace(/\r\n/g, '\n');
 
-    expect(actualValueNormalized).to.be.equal(expectedValueNormalized, `${targetName} has an unexpected value ${cellHTML.innerHTML} in variable explorer cell`);
+        expect(actualValueNormalized).to.be.equal(expectedValueNormalized, `${targetName} has an unexpected value ${innerHTML} in variable explorer cell`);
+    } else {
+        if (value) {
+            expect(innerHTML).to.include('image-button-image', `Image class not found in ${targetName}`);
+        } else {
+            expect(innerHTML).to.not.include('image-button-image', `Image class was found ${targetName}`);
+        }
+    }
 }
