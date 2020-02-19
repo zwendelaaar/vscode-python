@@ -14,6 +14,10 @@
    ([#10074](https://github.com/Microsoft/vscode-python/issues/10074))
 1. Fix data viewer not opening on certain data frames.
    ([#10075](https://github.com/Microsoft/vscode-python/issues/10075))
+1. Fix svg mimetype so it shows up correctly in richest mimetype order.
+   ([#10168](https://github.com/Microsoft/vscode-python/issues/10168))
+1. Perf improvements to executing startup code for `Data Science` features when extension loads.
+   ([#10170](https://github.com/Microsoft/vscode-python/issues/10170))
 
 ### Code Health
 
@@ -23,6 +27,8 @@
    ([#9883](https://github.com/Microsoft/vscode-python/issues/9883))
 1. Change select kernel telemetry to track duration till quick pick appears.
    ([#10049](https://github.com/Microsoft/vscode-python/issues/10049))
+1. Track cold/warm times to execute notebook cells.
+   ([#10176](https://github.com/Microsoft/vscode-python/issues/10176))
 
 ### Thanks
 
