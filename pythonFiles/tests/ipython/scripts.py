@@ -46,7 +46,7 @@ def execute_script(file, replace_dict=dict([])):
 def get_variables(capsys):
     path = os.path.dirname(os.path.abspath(__file__))
     file = os.path.abspath(
-        os.path.join(path, "../../datascience/getJupyterVariableList.py")
+        os.path.join(path, "../../vscode_datascience_helpers/getJupyterVariableList.py")
     )
     if execute_script(file):
         read_out = capsys.readouterr()
@@ -65,7 +65,9 @@ def get_variable_value(variables, name, capsys):
     varJson = find_variable_json(variables, name)
     path = os.path.dirname(os.path.abspath(__file__))
     file = os.path.abspath(
-        os.path.join(path, "../../datascience/getJupyterVariableValue.py")
+        os.path.join(
+            path, "../../vscode_datascience_helpers/getJupyterVariableValue.py"
+        )
     )
     keys = dict([("_VSCode_JupyterTestValue", json.dumps(varJson))])
     if execute_script(file, keys):
@@ -79,7 +81,9 @@ def get_data_frame_info(variables, name, capsys):
     varJson = find_variable_json(variables, name)
     path = os.path.dirname(os.path.abspath(__file__))
     file = os.path.abspath(
-        os.path.join(path, "../../datascience/getJupyterVariableDataFrameInfo.py")
+        os.path.join(
+            path, "../../vscode_datascience_helpers/getJupyterVariableDataFrameInfo.py"
+        )
     )
     keys = dict([("_VSCode_JupyterTestValue", json.dumps(varJson))])
     if execute_script(file, keys):
@@ -92,7 +96,9 @@ def get_data_frame_info(variables, name, capsys):
 def get_data_frame_rows(varJson, start, end, capsys):
     path = os.path.dirname(os.path.abspath(__file__))
     file = os.path.abspath(
-        os.path.join(path, "../../datascience/getJupyterVariableDataFrameRows.py")
+        os.path.join(
+            path, "../../vscode_datascience_helpers/getJupyterVariableDataFrameRows.py"
+        )
     )
     keys = dict(
         [
