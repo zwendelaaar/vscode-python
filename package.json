@@ -1636,10 +1636,22 @@
                     "description": "Allows a user to import a jupyter notebook into a python file anytime one is opened.",
                     "scope": "resource"
                 },
-                "python.dataScience.loadWidgetScriptsFromThirdPartySource": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Enables loading of scripts files for Widgets (ipywidgest, bqplot, beakerx, ipyleaflet, etc) from https://unpkg.com.",
+                "python.dataScience.widgetScriptSources": {
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "jsdelivr.com",
+                            "unpkg.com"
+                        ],
+                        "enumDescriptions": [
+                            "Loads widget (javascript) scripts from https://www.jsdelivr.com/",
+                            "Loads widget (javascript) scripts from https://unpkg.com/"
+                        ]
+                    },
+                    "uniqueItems": true,
+                    "markdownDescription": "Defines the location and order of the sources where scripts files for Widgets are downloaded from (e.g. ipywidgest, bqplot, beakerx, ipyleaflet, etc). Not selecting any of these could result in widgets not rendering or function correctly. See [here](https://aka.ms/PVSCIPyWidgets) for more information. Once updated you will need to restart the Kernel.",
                     "scope": "machine"
                 },
                 "python.dataScience.gatherRules": {
@@ -2995,6 +3007,7 @@
         "request": "^2.87.0",
         "request-progress": "^3.0.0",
         "rxjs": "^5.5.9",
+        "sanitize-filename": "^1.6.3",
         "semver": "^5.5.0",
         "stack-trace": "0.0.10",
         "string-argv": "^0.3.1",
@@ -3171,7 +3184,7 @@
         "node-has-native-dependencies": "^1.0.2",
         "node-html-parser": "^1.1.13",
         "nyc": "^15.0.0",
-        "playwright": "^0.11.1",
+        "playwright-chromium": "^0.13.0",
         "postcss": "^7.0.27",
         "postcss-cssnext": "^3.1.0",
         "postcss-import": "^12.0.1",
@@ -3195,7 +3208,6 @@
         "requirejs": "^2.3.6",
         "rewiremock": "^3.13.0",
         "rimraf": "^3.0.2",
-        "sanitize-filename": "^1.6.3",
         "sass-loader": "^7.1.0",
         "serialize-javascript": "^2.1.2",
         "shortid": "^2.2.8",

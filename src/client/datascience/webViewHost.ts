@@ -4,7 +4,7 @@
 import '../common/extensions';
 
 import { injectable, unmanaged } from 'inversify';
-import { ConfigurationChangeEvent, ViewColumn, WebviewPanel, WorkspaceConfiguration } from 'vscode';
+import { ConfigurationChangeEvent, Uri, ViewColumn, WebviewPanel, WorkspaceConfiguration } from 'vscode';
 
 import { IWebPanel, IWebPanelMessageListener, IWebPanelProvider, IWorkspaceService } from '../common/application/types';
 import { isTestExecution } from '../common/constants';
@@ -82,7 +82,6 @@ export abstract class WebViewHost<IMapping> implements IDisposable {
             this.webPanel.updateCwd(cwd);
         }
     }
-
     public dispose() {
         if (!this.isDisposed) {
             this.disposed = true;
@@ -116,6 +115,12 @@ export abstract class WebViewHost<IMapping> implements IDisposable {
             this.themeIsDarkPromise = createDeferred<boolean>();
             this.themeIsDarkPromise.resolve(isDark);
         }
+    }
+    protected asWebviewUri(localResource: Uri) {
+        if (!this.webPanel) {
+            throw new Error('asWebViewUri called too early');
+        }
+        return this.webPanel?.asWebviewUri(localResource);
     }
 
     protected abstract getOwningResource(): Promise<Resource>;
@@ -251,6 +256,8 @@ export abstract class WebViewHost<IMapping> implements IDisposable {
 
             traceWarning(`startHttpServer=${startHttpServer}, will not be used. Temporarily turned off`);
 
+            const workspaceFolder = this.workspaceService.getWorkspaceFolder(Uri.file(cwd))?.uri;
+
             // Use this script to create our web view panel. It should contain all of the necessary
             // script to communicate with this class.
             this.webPanel = await this.provider.create({
@@ -262,7 +269,8 @@ export abstract class WebViewHost<IMapping> implements IDisposable {
                 settings,
                 startHttpServer: false,
                 cwd,
-                webViewPanel
+                webViewPanel,
+                additionalPaths: workspaceFolder ? [workspaceFolder.fsPath] : []
             });
 
             traceInfo('Web view created.');
@@ -367,7 +375,7 @@ export abstract class WebViewHost<IMapping> implements IDisposable {
             event.affectsConfiguration('files.autoSave') ||
             event.affectsConfiguration('files.autoSaveDelay') ||
             event.affectsConfiguration('python.dataScience.enableGather') ||
-            event.affectsConfiguration('python.dataScience.loadWidgetScriptsFromThirdPartySource')
+            event.affectsConfiguration('python.dataScience.widgetScriptSources')
         ) {
             // See if the theme changed
             const newSettings = await this.generateDataScienceExtraSettings();

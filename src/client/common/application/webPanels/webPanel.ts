@@ -28,11 +28,12 @@ export class WebPanel implements IWebPanel {
         private disposableRegistry: IDisposableRegistry,
         private port: number | undefined,
         private token: string | undefined,
-        private options: IWebPanelOptions
+        private options: IWebPanelOptions,
+        additionalRootPaths: Uri[] = []
     ) {
         const webViewOptions: WebviewOptions = {
             enableScripts: true,
-            localResourceRoots: [Uri.file(this.options.rootPath), Uri.file(this.options.cwd)],
+            localResourceRoots: [Uri.file(this.options.rootPath), Uri.file(this.options.cwd), ...additionalRootPaths],
             portMapping: port ? [{ webviewPort: RemappedPort, extensionHostPort: port }] : undefined
         };
         if (options.webViewPanel) {
@@ -70,6 +71,12 @@ export class WebPanel implements IWebPanel {
         if (this.panel) {
             this.panel.dispose();
         }
+    }
+    public asWebviewUri(localResource: Uri) {
+        if (!this.panel) {
+            throw new Error('WebView not initialized, too early to get a Uri');
+        }
+        return this.panel?.webview.asWebviewUri(localResource);
     }
 
     public isVisible(): boolean {
@@ -161,7 +168,7 @@ export class WebPanel implements IWebPanel {
                 <meta name="theme" content="${Identifiers.GeneratedThemeName}"/>
                 <title>VS Code Python React UI</title>
                 <base href="${uriBase}${uriBase.endsWith('/') ? '' : '/'}"/>
-                <link rel="stylesheet" href="${rootPath}/../common/node_modules/font-awesome/css/font-awesome.min.css">                
+                <link rel="stylesheet" href="${rootPath}/../common/node_modules/font-awesome/css/font-awesome.min.css">
                 </head>
             <body>
                 <noscript>You need to enable JavaScript to run this app.</noscript>
