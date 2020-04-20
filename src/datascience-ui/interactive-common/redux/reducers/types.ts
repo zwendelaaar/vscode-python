@@ -219,6 +219,7 @@ export interface ILoadIPyWidgetClassFailureAction {
     isOnline: boolean;
     // tslint:disable-next-line: no-any
     error: any;
+    timedout: boolean;
 }
 export type LoadIPyWidgetClassDisabledAction = {
     className: string;
