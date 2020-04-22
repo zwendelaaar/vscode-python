@@ -8,6 +8,8 @@
    ([#11274](https://github.com/Microsoft/vscode-python/issues/11274))
 1. Error: Timeout is shown after running any widget more than once.
    ([#11334](https://github.com/Microsoft/vscode-python/issues/11334))
+1. Show unhandled widget messages in the jupyter output window.
+   ([#11239](https://github.com/Microsoft/vscode-python/issues/11239))
 
 ### Thanks
 
