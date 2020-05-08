@@ -1761,6 +1761,12 @@
                     "description": "Maximum size (in pixels) of text output in the Python Interactive window and Notebook Editor before a scrollbar appears. First enable scrolling for cell outputs in settings.",
                     "scope": "resource"
                 },
+                "python.dataScience.alwaysScrollOnNewCell": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Automatically scroll the interactive window to show the output of the last statement executed. If false, the interactive window will only automatically scroll if the bottom of the prior cell is visible.",
+                    "scope": "resource"
+                },
                 "python.dataScience.enableScrollingForCellOutputs": {
                     "type": "boolean",
                     "default": true,
