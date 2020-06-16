@@ -160,24 +160,6 @@ stages:
               TestsToRun: 'testfunctional'
               NeedsPythonTestReqs: true
               NeedsPythonFunctionalReqs: true
-            'Single Workspace':
-              TestsToRun: 'testSingleWorkspace'
-              NeedsPythonTestReqs: true
-            'Multi Workspace':
-              TestsToRun: 'testMultiWorkspace'
-              NeedsPythonTestReqs: true
-            'Venv':
-              TestsToRun: 'venvTests'
-              NeedsPythonTestReqs: true
-              NeedsIPythonReqs: true
-              PYTHON_VIRTUAL_ENVS_LOCATION: './src/tmp/envPaths.json'
-            'Debugger':
-              TestsToRun: 'testDebugger'
-              NeedsPythonTestReqs: true
-            'Smoke':
-              TestsToRun: 'testSmoke'
-              NeedsPythonTestReqs: true
-              NeedsIPythonReqs: true
           maxParallel: 2
         pool:
           vmImage: 'vs2017-win2016'
