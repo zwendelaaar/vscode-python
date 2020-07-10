@@ -105,12 +105,12 @@
         "name": "LocalZMQKernel - experiment",
         "salt": "LocalZMQKernel",
         "min": 0,
-        "max": 75
+        "max": 100
     },
     {
         "name": "LocalZMQKernel - control",
         "salt": "LocalZMQKernel",
-        "min": 75,
+        "min": 100,
         "max": 100
     },
     {
