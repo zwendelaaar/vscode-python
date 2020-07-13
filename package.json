@@ -8,7 +8,7 @@
     },
     "languageServerVersion": "0.5.30",
     "publisher": "ms-python",
-    "enableProposedApi": false,
+    "enableProposedApi": true,
     "author": {
         "name": "Microsoft Corporation"
     },
@@ -28,7 +28,7 @@
         "theme": "dark"
     },
     "engines": {
-        "vscode": "^1.46.0"
+        "vscode": "^1.47.0"
     },
     "keywords": [
         "python",
@@ -43,7 +43,10 @@
         "Snippets",
         "Formatters",
         "Other",
-        "Extension Packs"
+        "Extension Packs",
+        "Data Science",
+        "Machine Learning",
+        "Notebooks"
     ],
     "activationEvents": [
         "onLanguage:python",
@@ -60,6 +63,7 @@
         "onCommand:python.viewTestOutput",
         "onCommand:python.viewOutput",
         "onCommand:python.datascience.viewJupyterOutput",
+        "onCOmmand:python.datascience.export",
         "onCommand:python.datascience.exportAsPythonScript",
         "onCommand:python.datascience.exportToHTML",
         "onCommand:python.datascience.exportToPDF",
@@ -357,6 +361,15 @@
                 "command": "python.datascience.viewJupyterOutput",
                 "title": "%python.command.python.datascience.viewJupyterOutput.title%",
                 "category": "Python"
+            },
+            {
+                "command": "python.datascience.export",
+                "title": "%DataScience.notebookExportAs%",
+                "category": "Python",
+                "icon": {
+                    "light": "resources/light/export_to_python.svg",
+                    "dark": "resources/dark/export_to_python.svg"
+                }
             },
             {
                 "command": "python.datascience.exportAsPythonScript",
@@ -682,6 +695,25 @@
                 "enablement": "python.datascience.notebookeditor.canrestartNotebookkernel"
             },
             {
+                "command": "python.datascience.notebookeditor.trust",
+                "title": "%DataScience.trustNotebookCommandTitle%",
+                "category": "Python",
+                "icon": {
+                    "light": "resources/light/un-trusted.svg",
+                    "dark": "resources/dark/un-trusted.svg"
+                },
+                "enablement": "notebookEditorFocused && !python.datascience.isnotebooktrusted && python.datascience.trustfeatureenabled"
+            },
+            {
+                "command": "python.datascience.notebookeditor.trusted",
+                "title": "%DataScience.notebookIsTrusted%",
+                "category": "Python",
+                "icon": {
+                    "light": "resources/light/trusted.svg",
+                    "dark": "resources/dark/trusted.svg"
+                }
+            },
+            {
                 "command": "python.datascience.notebookeditor.runallcells",
                 "title": "%python.command.python.datascience.notebookeditor.runallcells.title%",
                 "category": "Python"
@@ -844,6 +876,24 @@
                 {
                     "command": "python.datascience.notebookeditor.restartkernel",
                     "title": "%python.command.python.datascience.restartkernel.title%",
+                    "group": "navigation",
+                    "when": "notebookEditorFocused"
+                },
+                {
+                    "command": "python.datascience.notebookeditor.trust",
+                    "title": "%DataScience.trustNotebookCommandTitle%",
+                    "group": "navigation@1",
+                    "when": "notebookEditorFocused && !python.datascience.isnotebooktrusted && python.datascience.trustfeatureenabled"
+                },
+                {
+                    "command": "python.datascience.notebookeditor.trusted",
+                    "title": "%DataScience.notebookIsTrusted%",
+                    "group": "navigation@1",
+                    "when": "notebookEditorFocused && python.datascience.isnotebooktrusted && python.datascience.trustfeatureenabled"
+                },
+                {
+                    "command": "python.datascience.export",
+                    "title": "%DataScience.notebookExportAs%",
                     "group": "navigation",
                     "when": "notebookEditorFocused"
                 }
@@ -1120,6 +1170,18 @@
                     "when": "python.datascience.isnativeactive && python.datascience.featureenabled && python.datascience.isnotebooktrusted"
                 },
                 {
+                    "command": "python.datascience.notebookeditor.trust",
+                    "title": "%DataScience.trustNotebookCommandTitle%",
+                    "category": "Python",
+                    "when": "python.datascience.featureenabled && notebookEditorFocused && !python.datascience.isnotebooktrusted && python.datascience.trustfeatureenabled"
+                },
+                {
+                    "command": "python.datascience.notebookeditor.trusted",
+                    "title": "%DataScience.notebookIsTrusted%",
+                    "category": "Python",
+                    "when": "config.noExists"
+                },
+                {
                     "command": "python.datascience.notebookeditor.runallcells",
                     "title": "%python.command.python.datascience.notebookeditor.runallcells.title%",
                     "category": "Python",
@@ -1231,6 +1293,12 @@
                 {
                     "command": "python.datascience.gatherquality",
                     "title": "%DataScience.gatherQuality%",
+                    "category": "Python",
+                    "when": "false"
+                },
+                {
+                    "command": "python.datascience.export",
+                    "title": "%DataScience.notebookExportAs%",
                     "category": "Python",
                     "when": "false"
                 }
@@ -3085,7 +3153,43 @@
                     "when": "testsDiscovered"
                 }
             ]
-        }
+        },
+        "notebookOutputRenderer": [
+            {
+                "viewType": "jupyter-notebook-renderer",
+                "displayName": "Jupyter Notebook Renderer",
+                "mimeTypes": [
+                    "application/geo+json",
+                    "application/vdom.v1+json",
+                    "application/vnd.dataresource+json",
+                    "application/vnd.plotly.v1+json",
+                    "application/vnd.vega.v2+json",
+                    "application/vnd.vega.v3+json",
+                    "application/vnd.vega.v4+json",
+                    "application/vnd.vega.v5+json",
+                    "application/vnd.vegalite.v1+json",
+                    "application/vnd.vegalite.v2+json",
+                    "application/vnd.vegalite.v3+json",
+                    "application/vnd.vegalite.v4+json",
+                    "application/x-nteract-model-debug+json",
+                    "image/gif",
+                    "text/latex",
+                    "text/vnd.plotly.v1+html"
+                ]
+            }
+        ],
+        "notebookProvider": [
+            {
+                "viewType": "jupyter-notebook",
+                "displayName": "Jupyter Notebook (preview)",
+                "selector": [
+                    {
+                        "filenamePattern": "*.ipynb"
+                    }
+                ],
+                "priority": "option"
+            }
+        ]
     },
     "scripts": {
         "package": "gulp clean && gulp prePublishBundle && vsce package -o ms-python-insiders.vsix",

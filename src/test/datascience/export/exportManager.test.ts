@@ -33,17 +33,17 @@ suite('Data Science - Export Manager', () => {
         exportPdf = mock<IExport>();
 
         // tslint:disable-next-line: no-any
-        when(filePicker.getExportFileLocation(anything(), anything())).thenReturn(
+        when(filePicker.getExportFileLocation(anything(), anything(), anything())).thenReturn(
             Promise.resolve(Uri.file('test.pdf'))
         );
         // tslint:disable-next-line: no-empty
         when(exportUtil.generateTempDir()).thenResolve({ path: 'test', dispose: () => {} });
         when(exportUtil.makeFileInDirectory(anything(), anything(), anything())).thenResolve('foo');
         when(fileSystem.createTemporaryFile(anything())).thenResolve(instance(tempFile));
-        when(exportPdf.export(anything(), anything())).thenResolve();
+        when(exportPdf.export(anything(), anything(), anything())).thenResolve();
         when(filePicker.getExportFileLocation(anything(), anything())).thenResolve(Uri.file('foo'));
         // tslint:disable-next-line: no-any
-        when(reporter.createProgressIndicator(anything())).thenReturn(instance(mock<IDisposable>()) as any);
+        when(reporter.createProgressIndicator(anything(), anything())).thenReturn(instance(mock<IDisposable>()) as any);
         exporter = new ExportManager(
             instance(exportPdf),
             instance(exportHtml),
