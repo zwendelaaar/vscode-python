@@ -42,6 +42,8 @@ export class GatherListener implements IInteractiveWindowListener {
     private notebookUri: Uri | undefined;
     private gatherProvider: IGatherProvider | undefined;
     private gatherTimer: StopWatch | undefined;
+    private linesSubmitted: number = 0;
+    private cellsSubmitted: number = 0;
 
     constructor(
         @inject(IApplicationShell) private applicationShell: IApplicationShell,
@@ -78,8 +80,19 @@ export class GatherListener implements IInteractiveWindowListener {
                 break;
 
             case InteractiveWindowMessages.RestartKernel:
+                this.linesSubmitted = 0;
+                this.cellsSubmitted = 0;
                 if (this.gatherProvider) {
                     this.gatherProvider.resetLog();
+                }
+                break;
+
+            case InteractiveWindowMessages.FinishCell:
+                const cell = payload as ICell;
+                if (cell && cell.data && cell.data.source) {
+                    const lineCount: number = cell.data.source.length as number;
+                    this.linesSubmitted += lineCount;
+                    this.cellsSubmitted += 1;
                 }
                 break;
 
@@ -155,6 +168,13 @@ export class GatherListener implements IInteractiveWindowListener {
                 await this.showNotebook(slicedProgram, cell);
                 sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'notebook' });
             }
+
+            sendTelemetryEvent(Telemetry.GatherStats, undefined, {
+                linesSubmitted: this.linesSubmitted,
+                cellsSubmitted: this.cellsSubmitted,
+                linesGathered: slicedProgram.splitLines().length,
+                cellsGathered: generateCellsFromString(slicedProgram).length
+            });
         }
     };
 
