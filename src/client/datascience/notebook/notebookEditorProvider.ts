@@ -4,11 +4,12 @@
 'use strict';
 
 import { inject, injectable } from 'inversify';
-import { Event, EventEmitter, Uri } from 'vscode';
+import { ConfigurationTarget, Event, EventEmitter, extensions, Uri } from 'vscode';
 import type { NotebookDocument, NotebookEditor as VSCodeNotebookEditor } from 'vscode-proposed';
 import { IApplicationShell, ICommandManager, IVSCodeNotebook } from '../../common/application/types';
 import '../../common/extensions';
 
+import { LanguageServerType } from '../../activation/types';
 import { IConfigurationService, IDisposableRegistry } from '../../common/types';
 import { createDeferred, Deferred } from '../../common/utils/async';
 import { IServiceContainer } from '../../ioc/types';
@@ -111,6 +112,16 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
     }
     @captureTelemetry(Telemetry.CreateNewNotebook, undefined, false)
     public async createNew(contents?: string): Promise<INotebookEditor> {
+        const settings = this.configurationService.getSettings();
+        if (settings.languageServer === LanguageServerType.Jedi) {
+            const ext = extensions.getExtension('ms-python.vscode-pylance');
+            const langServer = ext ? LanguageServerType.Node : LanguageServerType.Microsoft;
+
+            this.configurationService
+                .updateSetting('python.languageServer', langServer, undefined, ConfigurationTarget.Global)
+                .ignoreErrors();
+        }
+
         setSharedProperty('ds_notebookeditor', 'native');
         const model = await this.storage.createNew(contents, true);
         return this.open(model.file);
