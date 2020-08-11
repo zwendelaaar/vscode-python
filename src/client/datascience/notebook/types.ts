@@ -3,7 +3,7 @@
 
 'use strict';
 
-import type { CancellationToken } from 'vscode';
+import type { CancellationToken, Event } from 'vscode';
 import type {
     NotebookCell,
     NotebookContentProvider as VSCodeNotebookContentProvider,
@@ -19,6 +19,7 @@ export interface INotebookExecutionService {
 
 export const INotebookContentProvider = Symbol('INotebookContentProvider');
 export interface INotebookContentProvider extends VSCodeNotebookContentProvider {
+    readonly onDidSaveNotebook: Event<NotebookDocument>;
     /**
      * Notify VS Code that document has changed.
      * The change is not something that can be undone by using the `undo`.

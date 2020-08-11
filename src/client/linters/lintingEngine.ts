@@ -7,11 +7,11 @@ import { inject, injectable } from 'inversify';
 import { Minimatch } from 'minimatch';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { isWindows } from '../../test/core';
 import { IDocumentManager, IWorkspaceService } from '../common/application/types';
 import { STANDARD_OUTPUT_CHANNEL } from '../common/constants';
 import { IFileSystem } from '../common/platform/types';
 import { IConfigurationService, IOutputChannel } from '../common/types';
-import { isNotebookCell } from '../common/utils/misc';
 import { StopWatch } from '../common/utils/stopWatch';
 import { IServiceContainer } from '../ioc/types';
 import { sendTelemetryWhenDone } from '../telemetry';
@@ -66,9 +66,6 @@ export class LintingEngine implements ILintingEngine {
     }
 
     public async lintDocument(document: vscode.TextDocument, trigger: LinterTrigger): Promise<void> {
-        if (isNotebookCell(document)) {
-            return;
-        }
         this.diagnosticCollection.set(document.uri, []);
 
         // Check if we need to lint this document
@@ -76,19 +73,20 @@ export class LintingEngine implements ILintingEngine {
             return;
         }
 
-        if (this.pendingLintings.has(document.uri.fsPath)) {
-            this.pendingLintings.get(document.uri.fsPath)!.cancel();
-            this.pendingLintings.delete(document.uri.fsPath);
+        const documentKey = this.getDocumentKey(document);
+        if (this.pendingLintings.has(documentKey)) {
+            this.pendingLintings.get(documentKey)!.cancel();
+            this.pendingLintings.delete(documentKey);
         }
 
         const cancelToken = new vscode.CancellationTokenSource();
         cancelToken.token.onCancellationRequested(() => {
-            if (this.pendingLintings.has(document.uri.fsPath)) {
-                this.pendingLintings.delete(document.uri.fsPath);
+            if (this.pendingLintings.has(documentKey)) {
+                this.pendingLintings.delete(documentKey);
             }
         });
 
-        this.pendingLintings.set(document.uri.fsPath, cancelToken);
+        this.pendingLintings.set(documentKey, cancelToken);
 
         const activeLinters = await this.linterManager.getActiveLinters(false, document.uri);
         const promises: Promise<ILintMessage[]>[] = activeLinters.map(async (info: ILinterInfo) => {
@@ -126,6 +124,13 @@ export class LintingEngine implements ILintingEngine {
         }
         // Set all diagnostics found in this pass, as this method always clears existing diagnostics.
         this.diagnosticCollection.set(document.uri, diagnostics);
+    }
+
+    private getDocumentKey(document: vscode.TextDocument): string {
+        if (isWindows) {
+            return document.uri.toString().toLowerCase();
+        }
+        return document.uri.toString();
     }
 
     private sendLinterRunTelemetry(
@@ -186,7 +191,10 @@ export class LintingEngine implements ILintingEngine {
         if (ignoreMinmatches.some((matcher) => matcher.match(document.fileName) || matcher.match(relativeFileName))) {
             return false;
         }
-        if (document.uri.scheme !== 'file' || !document.uri.fsPath) {
+        if (
+            (document.uri.scheme !== 'file' && document.uri.scheme !== 'vscode-notebook-cell') ||
+            !document.uri.fsPath
+        ) {
             return false;
         }
         return this.fileSystem.fileExists(document.uri.fsPath);

@@ -5,10 +5,10 @@
 
 import { inject, injectable } from 'inversify';
 import * as path from 'path';
-import { ConfigurationChangeEvent, Disposable, TextDocument, Uri, workspace } from 'vscode';
+import { ConfigurationChangeEvent, Disposable, NotebookDocument, TextDocument, Uri, workspace } from 'vscode';
 import { IExtensionActivationService } from '../activation/types';
-import { IDocumentManager, IWorkspaceService } from '../common/application/types';
-import { isTestExecution } from '../common/constants';
+import { IDocumentManager, IVSCodeNotebook, IWorkspaceService } from '../common/application/types';
+import { isTestExecution, UseVSCodeNotebookEditorApi } from '../common/constants';
 import '../common/extensions';
 import { IFileSystem } from '../common/platform/types';
 import { IConfigurationService, IDisposable } from '../common/types';
@@ -27,6 +27,7 @@ export class LinterProvider implements IExtensionActivationService, Disposable {
     private readonly disposables: IDisposable[] = [];
     private workspaceService: IWorkspaceService;
     private activatedOnce: boolean = false;
+    private notebookService: IVSCodeNotebook | undefined;
 
     constructor(@inject(IServiceContainer) private serviceContainer: IServiceContainer) {
         this.serviceContainer = serviceContainer;
@@ -37,6 +38,9 @@ export class LinterProvider implements IExtensionActivationService, Disposable {
         this.documents = this.serviceContainer.get<IDocumentManager>(IDocumentManager);
         this.configuration = this.serviceContainer.get<IConfigurationService>(IConfigurationService);
         this.workspaceService = this.serviceContainer.get<IWorkspaceService>(IWorkspaceService);
+        if (this.serviceContainer.get<boolean>(UseVSCodeNotebookEditorApi)) {
+            this.notebookService = this.serviceContainer.get<IVSCodeNotebook>(IVSCodeNotebook);
+        }
     }
 
     public async activate(): Promise<void> {
@@ -59,6 +63,10 @@ export class LinterProvider implements IExtensionActivationService, Disposable {
             const timer = setTimeout(() => this.engine.lintOpenPythonFiles().ignoreErrors(), 1200);
             this.disposables.push({ dispose: () => clearTimeout(timer) });
         }
+
+        if (this.notebookService) {
+            this.notebookService.onDidSaveNotebookDocument(this.onDidSaveNotebook, this, this.disposables);
+        }
     }
 
     public dispose() {
@@ -76,6 +84,11 @@ export class LinterProvider implements IExtensionActivationService, Disposable {
                 this.engine.lintDocument(document, 'auto').ignoreErrors();
             }
         });
+    }
+
+    private onDidSaveNotebook(document: NotebookDocument): void {
+        // Fire saved for all of the cells in this document (as we don't get saved events for them)
+        document.cells.forEach((c) => this.onDocumentSaved(c.document));
     }
 
     private onDocumentOpened(document: TextDocument): void {

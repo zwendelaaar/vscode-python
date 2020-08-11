@@ -1541,6 +1541,7 @@ export interface IVSCodeNotebook {
     readonly onDidCloseNotebookDocument: Event<NotebookDocument>;
     readonly onDidChangeActiveNotebookEditor: Event<NotebookEditor | undefined>;
     readonly onDidChangeNotebookDocument: Event<NotebookCellChangedEvent>;
+    readonly onDidSaveNotebookDocument: Event<NotebookDocument>;
     readonly notebookEditors: Readonly<NotebookEditor[]>;
     readonly activeNotebookEditor: NotebookEditor | undefined;
     registerNotebookContentProvider(notebookType: string, provider: NotebookContentProvider): Disposable;

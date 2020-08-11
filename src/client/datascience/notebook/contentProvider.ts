@@ -37,8 +37,12 @@ const vscodeNotebookEnums = require('vscode') as typeof import('vscode-proposed'
 @injectable()
 export class NotebookContentProvider implements INotebookContentProvider {
     private notebookChanged = new EventEmitter<NotebookDocumentContentChangeEvent>();
+    private notebookSaved = new EventEmitter<NotebookDocument>();
     public get onDidChangeNotebook() {
         return this.notebookChanged.event;
+    }
+    public get onDidSaveNotebook() {
+        return this.notebookSaved.event;
     }
     constructor(
         @inject(INotebookStorageProvider) private readonly notebookStorage: INotebookStorageProvider,
@@ -87,6 +91,7 @@ export class NotebookContentProvider implements INotebookContentProvider {
             return;
         }
         await this.notebookStorage.save(model, cancellation);
+        this.notebookSaved.fire(document);
     }
 
     public async saveNotebookAs(
@@ -97,6 +102,7 @@ export class NotebookContentProvider implements INotebookContentProvider {
         const model = await this.notebookStorage.getOrCreateModel(document.uri, undefined, undefined, true);
         if (!cancellation.isCancellationRequested) {
             await this.notebookStorage.saveAs(model, targetResource);
+            this.notebookSaved.fire(document);
         }
     }
     public async backupNotebook(

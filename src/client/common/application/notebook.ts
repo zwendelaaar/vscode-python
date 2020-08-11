@@ -15,6 +15,7 @@ import type {
     NotebookOutputRenderer,
     NotebookOutputSelector
 } from 'vscode-proposed';
+import { INotebookContentProvider } from '../../datascience/notebook/types';
 import { UseProposedApi } from '../constants';
 import { IDisposableRegistry } from '../types';
 import {
@@ -74,6 +75,9 @@ export class VSCodeNotebook implements IVSCodeNotebook {
         }
         return this.notebook.activeNotebookEditor;
     }
+    public get onDidSaveNotebookDocument(): Event<NotebookDocument> {
+        return this.provider ? this.provider.onDidSaveNotebook : this._onDidSaveNotebookDocumentStandin.event;
+    }
     private get notebook() {
         if (!this._notebook) {
             // tslint:disable-next-line: no-require-imports
@@ -84,10 +88,12 @@ export class VSCodeNotebook implements IVSCodeNotebook {
     private readonly _onDidChangeNotebookDocument = new EventEmitter<
         NotebookCellsChangeEvent | NotebookCellOutputsChangeEvent | NotebookCellLanguageChangeEvent
     >();
+    private readonly _onDidSaveNotebookDocumentStandin = new EventEmitter<NotebookDocument>();
     private addedEventHandlers?: boolean;
     private _notebook?: typeof notebook;
     private readonly canUseNotebookApi?: boolean;
     private readonly handledCellChanges = new WeakSet<VSCNotebookCellsChangeEvent>();
+    private provider: INotebookContentProvider | undefined;
     constructor(
         @inject(UseProposedApi) private readonly useProposedApi: boolean,
         @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
@@ -99,6 +105,7 @@ export class VSCodeNotebook implements IVSCodeNotebook {
         }
     }
     public registerNotebookContentProvider(notebookType: string, provider: NotebookContentProvider): Disposable {
+        this.provider = provider as INotebookContentProvider;
         return this.notebook.registerNotebookContentProvider(notebookType, provider);
     }
     public registerNotebookKernelProvider(

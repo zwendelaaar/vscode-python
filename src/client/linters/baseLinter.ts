@@ -9,9 +9,11 @@ import { isTestExecution } from '../common/constants';
 import '../common/extensions';
 import { traceError } from '../common/logger';
 import { IPythonToolExecutionService } from '../common/process/types';
-import { ExecutionInfo, IConfigurationService, IPythonSettings, Product } from '../common/types';
+import { ExecutionInfo, IConfigurationService, IDisposableRegistry, IPythonSettings, Product } from '../common/types';
+import { isNotebookCell } from '../common/utils/misc';
 import { IServiceContainer } from '../ioc/types';
 import { ErrorHandler } from './errorHandlers/errorHandler';
+import { PyDocumentForNotebookCell } from './pyDocumentForNotebookCell';
 import { ILinter, ILinterInfo, ILinterManager, ILintMessage, LinterId, LintMessageSeverity } from './types';
 
 // tslint:disable-next-line:no-require-imports no-var-requires no-any
@@ -71,6 +73,7 @@ export abstract class BaseLinter implements ILinter {
     private _pythonSettings!: IPythonSettings;
     private _info: ILinterInfo;
     private workspace: IWorkspaceService;
+    private documentToFolderMap = new Map<string, string>();
 
     protected get pythonSettings(): IPythonSettings {
         return this._pythonSettings;
@@ -94,6 +97,21 @@ export abstract class BaseLinter implements ILinter {
 
     public async lint(document: vscode.TextDocument, cancellation: vscode.CancellationToken): Promise<ILintMessage[]> {
         this._pythonSettings = this.configService.getSettings(document.uri);
+
+        // Compute our working folder for this document before we try to run the linter.
+        const workspaceRootPath = this.getWorkspaceRootPath(document);
+
+        // Might have to create  temporary document if this is a notebook cell (it won't be readable by the linter)
+        if (isNotebookCell(document)) {
+            document = await PyDocumentForNotebookCell.createPyDocumentForNotebookCell(
+                document,
+                this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry)
+            );
+        }
+
+        // Map the document to the root path
+        this.documentToFolderMap.set(document.uri.toString(), workspaceRootPath);
+
         return this.runLinter(document, cancellation);
     }
 
@@ -142,7 +160,9 @@ export abstract class BaseLinter implements ILinter {
             return [];
         }
         const executionInfo = this.info.getExecutionInfo(args, document.uri);
-        const cwd = this.getWorkspaceRootPath(document);
+        const cwd = this.documentToFolderMap.has(document.uri.toString())
+            ? this.documentToFolderMap.get(document.uri.toString()) || ''
+            : this.getWorkspaceRootPath(document);
         const pythonToolsExecutionService = this.serviceContainer.get<IPythonToolExecutionService>(
             IPythonToolExecutionService
         );
@@ -153,7 +173,7 @@ export abstract class BaseLinter implements ILinter {
                 document.uri
             );
             this.displayLinterResultHeader(result.stdout);
-            return await this.parseMessages(result.stdout, document, cancellation, regEx);
+            return this.parseMessages(result.stdout, document, cancellation, regEx);
         } catch (error) {
             await this.handleError(error, document.uri, executionInfo);
             return [];
