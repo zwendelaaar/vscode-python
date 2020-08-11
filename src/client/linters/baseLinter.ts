@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { IWorkspaceService } from '../common/application/types';
 import { isTestExecution } from '../common/constants';
 import '../common/extensions';
-import { traceError } from '../common/logger';
+import { traceError, traceInfo } from '../common/logger';
 import { IPythonToolExecutionService } from '../common/process/types';
 import { ExecutionInfo, IConfigurationService, IDisposableRegistry, IPythonSettings, Product } from '../common/types';
 import { isNotebookCell } from '../common/utils/misc';
@@ -105,6 +105,7 @@ export abstract class BaseLinter implements ILinter {
         if (isNotebookCell(document)) {
             document = await PyDocumentForNotebookCell.createPyDocumentForNotebookCell(
                 document,
+                this.workspace,
                 this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry)
             );
         }
@@ -172,6 +173,11 @@ export abstract class BaseLinter implements ILinter {
                 { cwd, token: cancellation, mergeStdOutErr: false },
                 document.uri
             );
+
+            if (result.stderr) {
+                traceInfo(`Linter possible err:\n`, result.stderr);
+            }
+
             this.displayLinterResultHeader(result.stdout);
             return this.parseMessages(result.stdout, document, cancellation, regEx);
         } catch (error) {

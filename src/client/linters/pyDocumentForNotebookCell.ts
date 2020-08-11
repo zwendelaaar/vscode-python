@@ -6,6 +6,7 @@ import * as hashjs from 'hash.js';
 import { tmpdir } from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { IWorkspaceService } from '../common/application/types';
 import { IDisposableRegistry } from '../common/types';
 
 export class PyDocumentForNotebookCell implements vscode.TextDocument {
@@ -39,30 +40,28 @@ export class PyDocumentForNotebookCell implements vscode.TextDocument {
     private static disposables = new Map<string, () => void>();
     private temporaryPath: vscode.Uri;
     private contents: string;
-    private constructor(private notebookCellDocument: vscode.TextDocument, disposables: IDisposableRegistry) {
-        // Create a hash of the fsPath for our temporary file name. This hash should
-        // remain the same so future creations of this same object should write to the same file.
+    private constructor(
+        private notebookCellDocument: vscode.TextDocument,
+        workspace: IWorkspaceService,
+        disposables: IDisposableRegistry
+    ) {
         this.contents = notebookCellDocument.getText();
         this.temporaryPath = vscode.Uri.file(
             path.join(
-                tmpdir(),
-                `${hashjs.sha1().update(notebookCellDocument.uri.toString()).digest('hex').substr(0, 12)}`,
-                path.basename(notebookCellDocument.fileName)
+                this.computeOutputFolder(notebookCellDocument, workspace),
+                `${path.basename(notebookCellDocument.fileName, '.ipynb')}.py` // .py is required for some linters to work
             )
         );
-        if (!PyDocumentForNotebookCell.disposables.has(this.temporaryPath.fsPath)) {
-            const disposableFunc = () => {
-                fs.remove(path.basename(this.temporaryPath.fsPath)).ignoreErrors();
-            };
-            PyDocumentForNotebookCell.disposables.set(this.temporaryPath.fsPath, disposableFunc);
-            disposables.push({ dispose: disposableFunc });
-        }
+
+        // Make sure to cleanup all of the paths if necessary
+        this.createDisposableForDir(path.dirname(path.dirname(this.temporaryPath.fsPath)), disposables);
     }
     public static async createPyDocumentForNotebookCell(
         notebookCellDocument: vscode.TextDocument,
+        workspace: IWorkspaceService,
         disposables: IDisposableRegistry
     ): Promise<vscode.TextDocument> {
-        const doc = new PyDocumentForNotebookCell(notebookCellDocument, disposables);
+        const doc = new PyDocumentForNotebookCell(notebookCellDocument, workspace, disposables);
         await doc.writeContents();
         return doc;
     }
@@ -92,14 +91,41 @@ export class PyDocumentForNotebookCell implements vscode.TextDocument {
     public validatePosition(position: vscode.Position): vscode.Position {
         return this.notebookCellDocument.validatePosition(position);
     }
+    private createDisposableForDir(dir: string, disposableRegistry: IDisposableRegistry) {
+        if (!PyDocumentForNotebookCell.disposables.has(dir)) {
+            const disposableFunc = () => {
+                fs.remove(dir).ignoreErrors();
+            };
+            PyDocumentForNotebookCell.disposables.set(dir, disposableFunc);
+            disposableRegistry.push({ dispose: disposableFunc });
+        }
+    }
     private async writeContents(): Promise<void> {
         // Create root folder if necessary.
         const dir = path.dirname(this.temporaryPath.fsPath);
         if (!(await fs.pathExists(dir))) {
-            await fs.mkdir(dir);
+            await fs.mkdirs(dir);
         }
 
         // Write new contents. Use nodejs.fs cause we want this on the same machine as the extension
         return fs.writeFile(this.temporaryPath.fsPath, this.contents, { encoding: 'utf-8', flag: 'w' });
+    }
+    private computeOutputFolder(notebookCellDocument: vscode.TextDocument, workspace: IWorkspaceService): string {
+        // We need to write the output file to a folder under the workspace or some of the linters will fail (like bandit).
+
+        // So look there first
+        const folder = workspace.getWorkspaceFolder(vscode.Uri.file(notebookCellDocument.uri.fsPath));
+
+        // If not found, then use the temp dir
+        const baseFolder = folder
+            ? path.join(folder.uri.fsPath, '.vscode', '.notebook-linting')
+            : path.join(tmpdir(), '.notebook-linting');
+
+        // Combine this with a hash of the original URI so that
+        // we end up reusing the temp folder
+        return path.join(
+            baseFolder,
+            `${hashjs.sha1().update(notebookCellDocument.uri.toString()).digest('hex').substr(0, 12)}`
+        );
     }
 }

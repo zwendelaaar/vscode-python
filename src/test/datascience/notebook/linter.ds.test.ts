@@ -14,13 +14,7 @@ import { IDisposable } from '../../../client/common/types';
 import { INotebookEditorProvider } from '../../../client/datascience/types';
 import { IExtensionTestApi } from '../../common';
 import { EXTENSION_ROOT_DIR_FOR_TESTS, initialize } from '../../initialize';
-import {
-    canRunTests,
-    closeNotebooksAndCleanUpAfterTests,
-    createTemporaryNotebook,
-    setLinterToPylint,
-    trustAllNotebooks
-} from './helper';
+import { canRunTests, closeNotebooksAndCleanUpAfterTests, setLinterToPylint, trustAllNotebooks } from './helper';
 // tslint:disable-next-line: no-var-requires no-require-imports
 
 // tslint:disable: no-any no-invalid-this
