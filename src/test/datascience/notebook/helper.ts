@@ -163,6 +163,9 @@ export async function shutdownAllNotebooks() {
 }
 
 let oldValueFor_alwaysTrustNotebooks: undefined | boolean;
+let oldLinterSettings:
+    | { enabled: boolean; pylintEnabled: boolean; lintOnSave: boolean; pylintUseMinimalCheckers: boolean }
+    | undefined;
 export async function closeNotebooksAndCleanUpAfterTests(disposables: IDisposable[] = []) {
     await closeActiveWindows();
     disposeAllDisposables(disposables);
@@ -174,12 +177,41 @@ export async function closeNotebooksAndCleanUpAfterTests(disposables: IDisposabl
         dsSettings.alwaysTrustNotebooks = oldValueFor_alwaysTrustNotebooks;
         oldValueFor_alwaysTrustNotebooks = undefined;
     }
+    if (oldLinterSettings !== undefined) {
+        const api = await initialize();
+        const configService = api.serviceContainer.get<IConfigurationService>(IConfigurationService);
+        await configService.updateSetting('linting.enabled', oldLinterSettings.enabled);
+        await configService.updateSetting('linting.pylintEnabled', oldLinterSettings.pylintEnabled);
+        await configService.updateSetting('linting.lintOnSave', oldLinterSettings.lintOnSave);
+        await configService.updateSetting(
+            'linting.pylintUseMinimalCheckers',
+            oldLinterSettings.pylintUseMinimalCheckers
+        );
+        oldLinterSettings = undefined;
+    }
 
     sinon.restore();
 }
 export async function closeNotebooks(disposables: IDisposable[] = []) {
     await closeActiveWindows();
     disposeAllDisposables(disposables);
+}
+
+export async function setLinterToPylint(useMinimal: boolean) {
+    const api = await initialize();
+    const configService = api.serviceContainer.get<IConfigurationService>(IConfigurationService);
+    const settings = configService.getSettings();
+    oldLinterSettings = {
+        enabled: settings.linting.enabled,
+        pylintEnabled: settings.linting.pylintEnabled,
+        pylintUseMinimalCheckers: settings.linting.pylintUseMinimalCheckers,
+        lintOnSave: settings.linting.lintOnSave
+    };
+
+    await configService.updateSetting('linting.enabled', true);
+    await configService.updateSetting('linting.pylintEnabled', true);
+    await configService.updateSetting('linting.lintOnSave', true);
+    await configService.updateSetting('linting.pylintUseMinimalCheckers', useMinimal);
 }
 
 export async function trustAllNotebooks() {
