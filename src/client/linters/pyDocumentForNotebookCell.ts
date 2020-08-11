@@ -46,12 +46,13 @@ export class PyDocumentForNotebookCell implements vscode.TextDocument {
         this.temporaryPath = vscode.Uri.file(
             path.join(
                 tmpdir(),
-                `${hashjs.sha1().update(notebookCellDocument.uri.toString()).digest('hex').substr(0, 12)}.py`
+                `${hashjs.sha1().update(notebookCellDocument.uri.toString()).digest('hex').substr(0, 12)}`,
+                path.basename(notebookCellDocument.fileName)
             )
         );
         if (!PyDocumentForNotebookCell.disposables.has(this.temporaryPath.fsPath)) {
             const disposableFunc = () => {
-                fs.remove(this.temporaryPath.fsPath).ignoreErrors();
+                fs.remove(path.basename(this.temporaryPath.fsPath)).ignoreErrors();
             };
             PyDocumentForNotebookCell.disposables.set(this.temporaryPath.fsPath, disposableFunc);
             disposables.push({ dispose: disposableFunc });
@@ -91,7 +92,14 @@ export class PyDocumentForNotebookCell implements vscode.TextDocument {
     public validatePosition(position: vscode.Position): vscode.Position {
         return this.notebookCellDocument.validatePosition(position);
     }
-    private writeContents(): Promise<void> {
+    private async writeContents(): Promise<void> {
+        // Create root folder if necessary.
+        const dir = path.dirname(this.temporaryPath.fsPath);
+        if (!(await fs.pathExists(dir))) {
+            await fs.mkdir(dir);
+        }
+
+        // Write new contents. Use nodejs.fs cause we want this on the same machine as the extension
         return fs.writeFile(this.temporaryPath.fsPath, this.contents, { encoding: 'utf-8', flag: 'w' });
     }
 }
