@@ -127,6 +127,9 @@ export class LintingEngine implements ILintingEngine {
     }
 
     private getDocumentKey(document: vscode.TextDocument): string {
+        // This method is necessary because the filename of a document is not
+        // sufficient to identify it (for example notebook cells have a #cellid on the end)
+        // However on windows case doesn't matter so convert to lower case.
         if (os.platform() === 'win32') {
             return document.uri.toString().toLowerCase();
         }
