@@ -113,7 +113,10 @@ export function isUri(resource?: Uri | any): resource is Uri {
         return false;
     }
     const uri = resource as Uri;
-    return typeof uri.path === 'string' && typeof uri.scheme === 'string';
+    if ('path' in uri && 'scheme' in uri) {
+        return typeof uri.path === 'string' && typeof uri.scheme === 'string';
+    }
+    return false;
 }
 
 export function isNotebookCell(documentOrUri: TextDocument | Uri): boolean {
