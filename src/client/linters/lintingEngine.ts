@@ -9,7 +9,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { IDocumentManager, IWorkspaceService } from '../common/application/types';
-import { STANDARD_OUTPUT_CHANNEL } from '../common/constants';
+import { NotebookCellScheme, STANDARD_OUTPUT_CHANNEL } from '../common/constants';
 import { IFileSystem } from '../common/platform/types';
 import { IConfigurationService, IOutputChannel } from '../common/types';
 import { StopWatch } from '../common/utils/stopWatch';
@@ -194,10 +194,7 @@ export class LintingEngine implements ILintingEngine {
         if (ignoreMinmatches.some((matcher) => matcher.match(document.fileName) || matcher.match(relativeFileName))) {
             return false;
         }
-        if (
-            (document.uri.scheme !== 'file' && document.uri.scheme !== 'vscode-notebook-cell') ||
-            !document.uri.fsPath
-        ) {
+        if ((document.uri.scheme !== 'file' && document.uri.scheme !== NotebookCellScheme) || !document.uri.fsPath) {
             return false;
         }
         return this.fileSystem.fileExists(document.uri.fsPath);

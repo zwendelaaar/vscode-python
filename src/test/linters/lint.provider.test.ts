@@ -7,6 +7,7 @@ import * as TypeMoq from 'typemoq';
 import * as vscode from 'vscode';
 import { LanguageServerType } from '../../client/activation/types';
 import { IApplicationShell, IDocumentManager, IWorkspaceService } from '../../client/common/application/types';
+import { UseVSCodeNotebookEditorApi } from '../../client/common/constants';
 import { PersistentStateFactory } from '../../client/common/persistentState';
 import { IFileSystem } from '../../client/common/platform/types';
 import {
@@ -113,6 +114,7 @@ suite('Linting - Provider', () => {
         serviceManager.addSingleton<IPersistentStateFactory>(IPersistentStateFactory, PersistentStateFactory);
         serviceManager.addSingleton<vscode.Memento>(IMemento, MockMemento, GLOBAL_MEMENTO);
         serviceManager.addSingleton<vscode.Memento>(IMemento, MockMemento, WORKSPACE_MEMENTO);
+        serviceManager.addSingletonInstance<boolean>(UseVSCodeNotebookEditorApi, false);
         lm = new LinterManager(serviceContainer, workspaceService.object);
         serviceManager.addSingletonInstance<ILinterManager>(ILinterManager, lm);
         emitter = new vscode.EventEmitter<vscode.TextDocument>();
