@@ -1,5 +1,7 @@
 // This code was copied from https://github.com/mochajs/mocha but modified to allow spec output at the same time
 // as the file.
+// Note: Even when running in parallel, the output logger is sync'd. It runs in the root mocha process and not
+// in the same process as the tests.
 'use strict';
 /**
  * @module XUnit
