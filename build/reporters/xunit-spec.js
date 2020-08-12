@@ -69,20 +69,23 @@ function XUnit(runner, options) {
     // the default name of the test suite if none is provided
     var DEFAULT_SUITE_NAME = 'Mocha Tests';
 
+    let outputPath = process.env.MOCHA_FILE;
     if (options && options.reporterOptions) {
-        if (options.reporterOptions.output) {
-            if (!fs.createWriteStream) {
-                throw createUnsupportedError('file output not supported in browser');
-            }
-
-            fs.mkdirSync(path.dirname(options.reporterOptions.output), {
-                recursive: true
-            });
-            self.fileStream = fs.createWriteStream(options.reporterOptions.output);
+        if (options.reporterOptions.output && !outputPath) {
+            outputPath = options.reporterOptions.output;
         }
-
         // get the suite name from the reporter options (if provided)
         suiteName = options.reporterOptions.suiteName;
+    }
+    if (outputPath) {
+        if (!fs.createWriteStream) {
+            throw createUnsupportedError('file output not supported in browser');
+        }
+
+        fs.mkdirSync(path.dirname(outputPath), {
+            recursive: true
+        });
+        self.fileStream = fs.createWriteStream(outputPath);
     }
 
     // fall back to the default suite name

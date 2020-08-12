@@ -3,7 +3,6 @@
     "require": ["out/test/unittests.js"],
     "exclude": "out/**/*.jsx",
     "reporter": "./build/reporters/xunit-spec.js",
-    "reporter-option": "output=test-junit.xml",
     "ui": "tdd",
     "recursive": true,
     "colors": true,
