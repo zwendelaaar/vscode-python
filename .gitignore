@@ -6,6 +6,7 @@ log.log
 *.pyc
 *.vsix
 **/.vscode/.ropeproject/**
+**/.vscode/.notebook-linting/**
 **/testFiles/**/.cache/**
 *.noseids
 .nyc_output

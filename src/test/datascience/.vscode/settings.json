@@ -26,5 +26,15 @@
     // We don't want jupyter to start when testing (DS functionality or anything else).
     "python.dataScience.disableJupyterAutoStart": true,
     "python.logging.level": "debug",
-    "python.dataScience.alwaysTrustNotebooks": true // In UI tests we don't want prompts for `Do you want to trust thie nb...`
+    "python.dataScience.alwaysTrustNotebooks": true, // In UI tests we don't want prompts for `Do you want to trust thie nb...`
+    "python.linting.pylintUseMinimalCheckers": false,
+    "python.linting.flake8Path": "flake8",
+    "python.linting.maxNumberOfProblems": 100,
+    "python.linting.banditPath": "bandit",
+    "python.linting.mypyPath": "mypy",
+    "python.linting.pycodestylePath": "pycodestyle",
+    "python.linting.prospectorPath": "prospector",
+    "python.linting.pydocstylePath": "pydocstyle",
+    "python.linting.pylamaPath": "pylama",
+    "python.linting.pylintPath": "pylint" 
 }

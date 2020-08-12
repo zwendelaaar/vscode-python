@@ -15,7 +15,7 @@ import { NotebookCell, NotebookDocument } from '../../../../types/vscode-propose
 import { CellDisplayOutput } from '../../../../typings/vscode-proposed';
 import { IApplicationEnvironment, IVSCodeNotebook } from '../../../client/common/application/types';
 import { MARKDOWN_LANGUAGE, PYTHON_LANGUAGE } from '../../../client/common/constants';
-import { IConfigurationService, ICryptoUtils, IDisposable } from '../../../client/common/types';
+import { IConfigurationService, ICryptoUtils, IDisposable, ILintingSettings } from '../../../client/common/types';
 import { noop, swallowExceptions } from '../../../client/common/utils/misc';
 import { Identifiers } from '../../../client/datascience/constants';
 import { JupyterNotebookView } from '../../../client/datascience/notebook/constants';
@@ -33,6 +33,9 @@ import { createEventHandler, waitForCondition } from '../../common';
 import { EXTENSION_ROOT_DIR_FOR_TESTS } from '../../constants';
 import { closeActiveWindows, initialize } from '../../initialize';
 const vscodeNotebookEnums = require('vscode') as typeof import('vscode-proposed');
+import { isObject } from 'lodash';
+import cloneDeep = require('lodash/cloneDeep');
+import { isArray } from '../../../client/common/utils/sysTypes';
 
 async function getServices() {
     const api = await initialize();
@@ -163,9 +166,7 @@ export async function shutdownAllNotebooks() {
 }
 
 let oldValueFor_alwaysTrustNotebooks: undefined | boolean;
-let oldLinterSettings:
-    | { enabled: boolean; pylintEnabled: boolean; lintOnSave: boolean; pylintUseMinimalCheckers: boolean }
-    | undefined;
+let oldLinterSettings: ILintingSettings | undefined;
 export async function closeNotebooksAndCleanUpAfterTests(disposables: IDisposable[] = []) {
     await closeActiveWindows();
     disposeAllDisposables(disposables);
@@ -180,12 +181,17 @@ export async function closeNotebooksAndCleanUpAfterTests(disposables: IDisposabl
     if (oldLinterSettings !== undefined) {
         const api = await initialize();
         const configService = api.serviceContainer.get<IConfigurationService>(IConfigurationService);
-        await configService.updateSetting('linting.enabled', oldLinterSettings.enabled);
-        await configService.updateSetting('linting.pylintEnabled', oldLinterSettings.pylintEnabled);
-        await configService.updateSetting('linting.lintOnSave', oldLinterSettings.lintOnSave);
-        await configService.updateSetting(
-            'linting.pylintUseMinimalCheckers',
-            oldLinterSettings.pylintUseMinimalCheckers
+        const keys = Object.keys(oldLinterSettings);
+        await Promise.all(
+            keys.map((k) => {
+                const val = oldLinterSettings ? (oldLinterSettings as any)[k] : false;
+                if (!isObject(val) && !isArray(val)) {
+                    return configService.updateSetting(`linting.${k}`, val);
+                } else {
+                    // Don't update the object like settings. We didn't set them anyway
+                    return Promise.resolve();
+                }
+            })
         );
         oldLinterSettings = undefined;
     }
@@ -197,21 +203,19 @@ export async function closeNotebooks(disposables: IDisposable[] = []) {
     disposeAllDisposables(disposables);
 }
 
-export async function setLinterToPylint(useMinimal: boolean) {
+export async function setLinter(type: string, useMinimal: boolean) {
     const api = await initialize();
     const configService = api.serviceContainer.get<IConfigurationService>(IConfigurationService);
     const settings = configService.getSettings();
-    oldLinterSettings = {
-        enabled: settings.linting.enabled,
-        pylintEnabled: settings.linting.pylintEnabled,
-        pylintUseMinimalCheckers: settings.linting.pylintUseMinimalCheckers,
-        lintOnSave: settings.linting.lintOnSave
-    };
+    oldLinterSettings = cloneDeep(settings.linting);
 
     await configService.updateSetting('linting.enabled', true);
-    await configService.updateSetting('linting.pylintEnabled', true);
     await configService.updateSetting('linting.lintOnSave', true);
-    await configService.updateSetting('linting.pylintUseMinimalCheckers', useMinimal);
+    const specificSetting = `linting.${type}Enabled`;
+    await configService.updateSetting(specificSetting, true);
+    if (type === 'pylint') {
+        await configService.updateSetting('linting.pylintUseMinimalCheckers', useMinimal);
+    }
 }
 
 export async function trustAllNotebooks() {
