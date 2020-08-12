@@ -179,7 +179,7 @@ export abstract class BaseLinter implements ILinter {
             }
 
             this.displayLinterResultHeader(result.stdout);
-            return this.parseMessages(result.stdout, document, cancellation, regEx);
+            return await this.parseMessages(result.stdout, document, cancellation, regEx);
         } catch (error) {
             await this.handleError(error, document.uri, executionInfo);
             return [];
