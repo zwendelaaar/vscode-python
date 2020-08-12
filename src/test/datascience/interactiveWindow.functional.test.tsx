@@ -128,7 +128,7 @@ suite('DataScience Interactive Window output tests', () => {
         async () => {
             await addCode(ioc, 'a=1\na');
 
-            verifyHtmlOnInteractiveCell('<span>1</span>', CellPosition.Last);
+            verifyHtmlOnInteractiveCell('<span>13</span>', CellPosition.Last);
         },
         () => {
             return ioc;

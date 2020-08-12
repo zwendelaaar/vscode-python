@@ -96,7 +96,7 @@ export interface ILogger {
 
 // Emit a log message derived from the args to all enabled transports.
 export function logToAll(loggers: ILogger[], logLevel: LogLevel, args: Arguments) {
-    const message = args.length === 0 ? '' : util.format(args[0], ...args.slice(1));
+    const message = args.length === 0 ? '' : util.format(`(${process.pid}): ${args[0]}`, ...args.slice(1));
     for (const logger of loggers) {
         if (logger.transports.length > 0) {
             const levelName = getLevelName(logLevel, logger.levels, isConsoleLogger(logger));
