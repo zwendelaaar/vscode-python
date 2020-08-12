@@ -5,9 +5,9 @@
 
 import { inject, injectable } from 'inversify';
 import { Minimatch } from 'minimatch';
+import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { isWindows } from '../../test/core';
 import { IDocumentManager, IWorkspaceService } from '../common/application/types';
 import { STANDARD_OUTPUT_CHANNEL } from '../common/constants';
 import { IFileSystem } from '../common/platform/types';
@@ -127,7 +127,7 @@ export class LintingEngine implements ILintingEngine {
     }
 
     private getDocumentKey(document: vscode.TextDocument): string {
-        if (isWindows) {
+        if (os.platform() === 'win32') {
             return document.uri.toString().toLowerCase();
         }
         return document.uri.toString();
