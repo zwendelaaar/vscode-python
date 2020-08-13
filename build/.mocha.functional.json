@@ -6,7 +6,6 @@
     "ui": "tdd",
     "recursive": true,
     "colors": true,
-    "grep": "Simple text",
     "exit": true,
     "parallel": true,
     "timeout": 180000
