@@ -405,7 +405,7 @@ steps:
     condition: contains(variables['TestsToRun'], 'testFunctional')
     inputs:
       testResultsFiles: '$(MOCHA_FILE)'
-      testResultsFormat: 'xUnit'
+      testResultsFormat: 'JUnit'
       testRunTitle: 'functional-$(Agent.Os)-Py$(pythonVersion)'
       buildPlatform: '$(Agent.Os)-Py$(pythonVersion)'
       buildConfiguration: 'FunctionalTests'
