@@ -211,6 +211,7 @@ XUnit.prototype.test = function (test) {
     };
 
     if (test.state === STATE_FAILED) {
+        Base.useColors = false;
         var err = test.err;
         var diff = !Base.hideDiff && Base.showDiff(err) ? '\n' + Base.generateDiff(err.actual, err.expected) : '';
         this.write(
@@ -221,6 +222,7 @@ XUnit.prototype.test = function (test) {
                 tag('failure', {}, false, escape(err.message) + escape(diff) + '\n' + escape(err.stack))
             )
         );
+        Base.useColors = true;
     } else if (test.isPending()) {
         this.write(tag('testcase', attrs, false, tag('skipped', {}, true)));
     } else {
